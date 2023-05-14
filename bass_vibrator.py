@@ -362,6 +362,7 @@ def start_stop():
                 addrEntry.config(state=DISABLED)
                 startButton.config(text='Stop')
     else:
+        root.socket_open=False
         try:
             sock.close()
         except:
