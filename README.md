@@ -1,7 +1,7 @@
 # XInput-Bass-Vibrator
 A program that vibrates XInput devices based on bass output from the default audio output
 
-#NOTE:
+# NOTE:
 The included VB-Cable must be installed along with a split audio output program (eg OBS+Audio Monitor). 
 
 To use the included OBS + Audio Monitor for splitting:
