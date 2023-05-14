@@ -11,3 +11,5 @@ To use the included OBS + Audio Monitor for splitting:
 3. On the newly created filter, select the VB Cable as your monitor output.
 
 Launch the app. Then, go to Windows Settings then System > Sound > Volume mixer > Bass Vibrator (expand) then select CABLE Output as the input device for that app. Relaunch the app for the settings to take effect.
+
+Note: The audio splitting program must be running for the program to work.
