@@ -22,4 +22,4 @@ If there is latency in the vibrations when using wired headphones/speakers, try 
 
 OBS (with necessary plugins): https://drive.google.com/file/d/1II3nyKbAy5YOEfShlgLsGeU040QMhkKW/view?usp=sharing
 
-Controllers with precise haptics, such as the Joy-Con, Nintendo Switch Pro Controller, or the DualSense (PS5 controller) is recommended.
+Controllers with precise haptics, such as the Joy-Con, Nintendo Switch Pro Controller, or the DualSense (PS5 controller) are recommended.
