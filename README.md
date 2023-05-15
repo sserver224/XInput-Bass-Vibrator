@@ -3,7 +3,7 @@ A program that vibrates XInput devices based on bass output from the default aud
 
 This offers the functionality of haptic vests, but at a much lower price.
 
-Donate to 3390232@gmail.com
+Donate to sserver224@gmail.com
 
 # NOTE:
 The included VB-Cable must be installed along with a split audio output program (eg OBS+Audio Monitor). 
