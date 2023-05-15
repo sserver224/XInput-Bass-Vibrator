@@ -18,6 +18,6 @@ Launch the app. Then, go to Windows Settings then System > Sound > Volume mixer 
 
 The audio splitting program must be running for the program to work.
 
-If there is latency in the vibrations when using wired headphones/speakers, try playing audio through a Bluetooth audio device to "lag" the sound a bit so it syncs up with the vibrations
+If there is latency in the vibrations when using wired headphones/speakers, try playing audio through a Bluetooth audio device to "lag" the sound a bit so it syncs up with the vibrations.
 
 OBS (with necessary plugins): https://drive.google.com/file/d/1II3nyKbAy5YOEfShlgLsGeU040QMhkKW/view?usp=sharing
