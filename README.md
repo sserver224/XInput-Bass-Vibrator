@@ -1,7 +1,7 @@
 # XInput-Bass-Vibrator
 A program that vibrates XInput devices based on bass output from the default audio output
 
-This offers the functionality of haptic vests, but at a much lower price.
+This offers the functionality of acousto-haptic vests and gloves, but at a much lower price.
 
 Donate to sserver224@gmail.com
 
