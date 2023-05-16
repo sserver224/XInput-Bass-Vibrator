@@ -19,7 +19,6 @@ Launch the app. Then, go to Windows Settings then System > Sound > Volume mixer 
 The audio splitting program must be running for the program to work.
 
 If there is latency in the vibrations when using wired headphones/speakers, try playing audio through a Bluetooth audio device to "lag" the sound a bit so it syncs up with the vibrations.
-
 OBS (with necessary plugins): https://drive.google.com/file/d/1II3nyKbAy5YOEfShlgLsGeU040QMhkKW/view?usp=sharing
 
 Controllers with precise haptics, such as the Joy-Con, Nintendo Switch Pro Controller, or the DualSense (PS5 controller) are recommended.
@@ -29,9 +28,8 @@ To connect an Xbox controller to your Windows PC, pair/connect it like you do fo
 To connect a Nintendo Switch controller to your Windows PC, use https://github.com/Davidobot/BetterJoy/.
 
 To connect a DualShock 3 controller to your Windows PC using BthPS3 and DSHidMini (preferred option, works wired and wireless), see below:
-Step 1: installation of required programs and drivers
 
-Full and updated instructions here: https://vigem.org/projects/DsHidMini/. Below my own quick summary, you can try my steps first, and refer to the full guide if anything fails
+Full and updated instructions here: https://vigem.org/projects/DsHidMini/. 
 
 1. First, turn on Bluetooth.
 
