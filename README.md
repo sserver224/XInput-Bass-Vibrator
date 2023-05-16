@@ -16,6 +16,8 @@ To use the included OBS + Audio Monitor for splitting:
 
 Launch the app. Then, go to Windows Settings then System > Sound > Volume mixer > Bass Vibrator (expand) then select CABLE Output as the input device for that app. Relaunch the app for the settings to take effect.
 
+Ignore any antivirus warnings, as my program is recently released, which can cause antiviruses to give a warning or even remove the file.
+
 The audio splitting program must be running for the program to work.
 
 If there is latency in the vibrations when using wired headphones/speakers, try playing audio through a Bluetooth audio device to "lag" the sound a bit so it syncs up with the vibrations.
