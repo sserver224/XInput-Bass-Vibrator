@@ -20,7 +20,7 @@ Ignore any antivirus warnings, as my program is recently released, which can cau
 
 The audio splitting program must be running for the program to work.
 
-If the controller(s) do not vibrate, see if the vibration meter (to the left of the intensity slider) is showing anything. If it is not bouncing around or is very low in value, check if your audio splitting program is running. If it is, try using your media player's equalizer (if using VLC or another Windows media player), an equalizer browser extension (if playing games or music or watching videos online), or [Equalizer APO](https://sourceforge.net/projects/equalizerapo/) + [Peace](https://sourceforge.net/projects/peace-equalizer-apo-extension/) (any other case or if none of these work) to boost the bass.
+If the controller(s) do not vibrate, see if the vibration meter (to the left of the intensity slider) is showing anything. If it is not bouncing around or is very low in value, check if your audio splitting program is running and sending audio from the default audio output to the VB Cable. If it is, try using your media player's equalizer (if using VLC or another Windows media player), an equalizer browser extension (if playing games or music or watching videos online), or [Equalizer APO](https://sourceforge.net/projects/equalizerapo/) + [Peace](https://sourceforge.net/projects/peace-equalizer-apo-extension/) (any other case or if none of these work) to boost the bass.
 
 If there is latency in the vibrations when using wired headphones/speakers, try playing audio through a Bluetooth audio device to "lag" the sound a bit so it syncs up with the vibrations.
 
