@@ -3,7 +3,7 @@ A program that vibrates XInput devices based on bass output from the default aud
 
 This offers the functionality of acousto-haptic vests and gloves, but at a much lower price.
 
-Donate to sserver224@gmail.com
+[Buy me a coffee](https://www.buymeacoffee.com/sserver224)
 
 # NOTE:
 The included VB-Cable must be installed along with a split audio output program (eg OBS+Audio Monitor). 
@@ -20,7 +20,7 @@ Ignore any antivirus warnings, as my program is recently released, which can cau
 
 The audio splitting program must be running for the program to work.
 
-If the controller(s) do not vibrate, see if the vibration meter (to the left of the intensity slider) is showing anything. If it is not bouncing around or is very low in value, check if your audio splitting program is running and sending audio from the default audio output to the VB Cable. If it is, try using your media player's equalizer (if using VLC or another Windows media player), an equalizer browser extension (if playing games or music or watching videos online), or [Equalizer APO](https://sourceforge.net/projects/equalizerapo/) + [Peace](https://sourceforge.net/projects/peace-equalizer-apo-extension/) (any other case or if none of these work) to boost the bass.
+If the controller(s) do not vibrate during heavy bass (such as gunshot or explosion sound effects), see if the vibration meter (to the left of the intensity slider) is showing anything. If it is not bouncing around or is very low in value, check if your audio splitting program is running and sending audio from the default audio output to the VB Cable. If it is, try using your media player's equalizer (if using VLC or another Windows media player), an equalizer browser extension (if playing games or music or watching videos online), or [Equalizer APO](https://sourceforge.net/projects/equalizerapo/) + [Peace](https://sourceforge.net/projects/peace-equalizer-apo-extension/) (any other case or if none of these work) to boost the bass.
 
 If there is latency in the vibrations when using wired headphones/speakers, try playing audio through a Bluetooth audio device to "lag" the sound a bit so it syncs up with the vibrations.
 
