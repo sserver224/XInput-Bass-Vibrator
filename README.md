@@ -26,6 +26,8 @@ OBS (with necessary plugins): https://drive.google.com/file/d/1II3nyKbAy5YOEfShl
 
 Controllers with precise haptics, such as the Joy-Con, Nintendo Switch Pro Controller, or the DualSense (PS5 controller) are recommended.
 
+Turn off right motor rumble if the right motor on the controller seems like to be an on/off motor and does not use a gradient. One example of a controller like this is the DualShock 3.
+
 # How to pair controllers from popular consoles to your PC
 
 To connect an Xbox controller to your Windows PC, pair/connect it like you do for any Bluetooth device.
