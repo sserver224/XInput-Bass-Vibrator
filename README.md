@@ -23,3 +23,36 @@ If there is latency in the vibrations when using wired headphones/speakers, try 
 OBS (with necessary plugins): https://drive.google.com/file/d/1II3nyKbAy5YOEfShlgLsGeU040QMhkKW/view?usp=sharing
 
 Controllers with precise haptics, such as the Joy-Con, Nintendo Switch Pro Controller, or the DualSense (PS5 controller) are recommended.
+
+To connect an Xbox controller to your Windows PC, pair/connect it like you do for any Bluetooth device.
+
+To connect a Nintendo Switch controller to your Windows PC, use https://github.com/Davidobot/BetterJoy/.
+
+To connect a DualShock 3 controller to your Windows PC using BthPS3 and DSHidMini (preferred option, works wired and wireless), see below:
+Step 1: installation of required programs and drivers
+
+Full and updated instructions here: https://vigem.org/projects/DsHidMini/. Below my own quick summary, you can try my steps first, and refer to the full guide if anything fails
+
+1. First, turn on Bluetooth.
+
+2. BthPS3: Download and install these bluetooth drivers (follow instructions therein) https://github.com/ViGEm/BthPS3/releases. If you get an error, make sure that your bluetooth is on before launching the installer. See the FAQ at the DsHidMini page if you still have errors (https://vigem.org/projects/DsHidMini)
+
+3. DsHidMini: Download this: https://github.com/ViGEm/DsHidMini/releases. Extract all files from the zip file, and save them in a folder that you'll remember. You'll use this whenever you need to set up a new DS3 controller.
+
+4. In the DsHidMini files, go to the x64 folder (for 64 bit PCs) or x86 folder (for 32 bit), subfolder "dshidmini" and right-click on each setup information file (dshidmini.inf and igfilter.inf) and select "install".
+
+First-time controller connection and setup
+
+5. Now, to get the controllers detected wirelessly, launch DSHMC.exe (as Admin), which is among the files extracted from the DsHidMini zip.
+
+6. Plug your PS3 controller via a USB cable. The controller should now appear listed in the program (left-hand pane), indicating that it has been detected.
+
+7. Select the controller on the left-hand side list to display details and options, and under "HID device mode", select XInput. This is crucial so it can be recognized by my program.
+
+8. Remove the USB cable and press the PS button to connect wirelessly. You may need to restart your computer once or twice for the connection to work.
+
+Note: When using this method the program will read the controller's battery as 'Critical' because it does not output battery information.
+
+Alternatively, you can use https://github.com/nefarius/ScpToolkit/releases to connect your DualShock 3 using a USB cable. To wirelessly use the controller you must use a Bluetooth dongle and install its driver. 
+
+If pairing a DualShock 4 or DualSense, pair it like an Xbox controller and follow steps 3, 4, and 7.
