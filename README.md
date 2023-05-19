@@ -32,6 +32,12 @@ Controllers with precise haptics, such as the Joy-Con, Nintendo Switch Pro Contr
 
 Turn off right motor rumble if the right motor on the controller seems like to be an on/off motor and does not use a gradient. One example of a controller like this is the DualShock 3.
 
+# BUGS:
+
+Response curve may be too strict
+
+Less bass may be captured if more controllers are connected
+
 # How to pair controllers from popular consoles to your PC
 
 To connect an Xbox controller to your Windows PC, pair/connect it like you do for any Bluetooth device.
