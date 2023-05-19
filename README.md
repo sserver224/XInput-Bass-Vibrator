@@ -42,7 +42,7 @@ Adding more controllers may decrease responsiveness and/or increase latency
 
 To connect an Xbox controller to your Windows PC, pair/connect it like you do for any Bluetooth device.
 
-To connect a Nintendo Switch, DualShock 4, or DualSense controller to your Windows PC, pair it like an Xbox Controller and use [DS4Windows](https://github.com/Ryochan7/DS4Windows/releases/tag/v3.2.10).
+To connect a Nintendo Switch, DualShock 4, or DualSense controller to your Windows PC, pair it like an Xbox Controller and use [DS4Windows](https://github.com/Ryochan7/DS4Windows).
 
 To connect a DualShock 3 controller to your Windows PC using BthPS3 and DSHidMini (preferred option, works wired and wireless), see below:
 
