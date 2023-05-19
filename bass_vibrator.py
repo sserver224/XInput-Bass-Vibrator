@@ -1,3 +1,4 @@
+#Copyright (c) 2023-present sserver224.
 import pyaudio
 import numpy as np
 from tkinter import *
