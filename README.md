@@ -36,7 +36,7 @@ Turn off right motor rumble if the right motor on the controller seems like to b
 
 Response curve may be too strict
 
-Less bass may be captured if more controllers are connected
+Adding more controllers may decrease responsiveness and/or increase latency
 
 # How to pair controllers from popular consoles to your PC
 
