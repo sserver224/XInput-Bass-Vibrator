@@ -30,6 +30,8 @@ OBS (with necessary plugins): https://drive.google.com/file/d/1II3nyKbAy5YOEfShl
 
 Controllers with precise haptics, such as the Joy-Con, Nintendo Switch Pro Controller, or the DualSense (PS5 controller) are recommended.
 
+If using a Nintendo Joy-Con or Pro-Con with DS4Windows, it is NOT recommended to set the vibration intensity higher than a 30%, as the HD rumble may be audible at that point.
+
 Turn off right motor rumble if the right motor on the controller seems like to be an on/off motor and does not use a gradient. One example of a controller like this is the DualShock 3.
 
 # BUGS:
