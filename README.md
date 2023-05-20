@@ -34,6 +34,8 @@ If using a Nintendo Joy-Con or Pro-Con with DS4Windows, it is NOT recommended to
 
 Turn off right motor rumble if the right motor on the controller seems like to be an on/off motor and does not use a gradient. One example of a controller like this is the DualShock 3.
 
+Wired connection is recommended as the vibration can update faster over a wired connection.
+
 # BUGS:
 
 Response curve may be too strict
