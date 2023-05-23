@@ -32,6 +32,8 @@ Controllers with precise haptics, such as the Joy-Con, Nintendo Switch Pro Contr
 
 If using a Nintendo Joy-Con or Pro-Con with DS4Windows, it is NOT recommended to set the vibration intensity higher than a 30%, as the HD rumble may be audible at that point.
 
+If using a Nintendo Switch JoyCon/ProCon with DS4Windows, the Home button ring will light up blue. **This is normal.**
+
 Turn off right motor rumble if the right motor on the controller seems like to be an on/off motor and does not use a gradient. One example of a controller like this is the DualShock 3.
 
 Wired connection is recommended as the vibration can update faster over a wired connection.
