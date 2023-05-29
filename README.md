@@ -26,6 +26,8 @@ If the controller(s) do not vibrate during heavy bass, see if the vibration mete
 
 If there is latency in the vibrations when using wired headphones/speakers, try playing audio through a Bluetooth audio device to "lag" the sound a bit so it syncs up with the vibrations.
 
+If the controller does not output power source information (like a battery) but is connected, the status indicator will show "Connected*".
+
 OBS (with necessary plugins): https://drive.google.com/file/d/1II3nyKbAy5YOEfShlgLsGeU040QMhkKW/view?usp=sharing
 
 Controllers with precise haptics, such as the Joy-Con, Nintendo Switch Pro Controller, or the DualSense (PS5 controller) are recommended.
@@ -71,7 +73,5 @@ First-time controller connection and setup
 7. Select the controller on the left-hand side list to display details and options, and under "HID device mode", select XInput. This is crucial so it can be recognized by my program.
 
 8. Remove the USB cable and press the PS button to connect wirelessly. You may need to restart your computer once or twice for the connection to work.
-
-Note: When using this method the program will read the controller's battery as 'Critical' because it does not output battery information.
 
 Alternatively, you can use [SCPToolkit](https://github.com/nefarius/ScpToolkit/releases) to connect your DualShock 3 using a USB cable. To wirelessly use the controller you must use a Bluetooth dongle and install its driver. 
