@@ -1,9 +1,18 @@
 #Copyright (c) 2023-present sserver224.
+#Copyright (c) 2023-present sserver224.
+from tendo import singleton
+import sys
+try:
+    me = singleton.SingleInstance()
+except:
+    from tkinter import messagebox
+    messagebox.showwarning('Warning','Bass Vibrator is already running')
+    sys.exit()
 import pyaudio
 import numpy as np
 from tkinter import *
 from tkinter.ttk import *
-import os, sys
+import os
 from XInput import *
 import pystray
 import ctypes, comtypes
@@ -108,12 +117,15 @@ def audio_callback(in_data, frame_count, time_info, status):
     bass_loudness = bass_energy / (max_value * len(bass_spectrum))
     # Print the loudness value
     if get_connected()[0]:
-        if get_battery_information(0)[1]=='EMPTY':
+        batt_info=get_battery_information(0)
+        if batt_info[0]=='DISCONNECTED':
+            statusLabel.configure(text='Connected*', foreground='#00ff00')
+        elif batt_info[1]=='EMPTY':
             if time.time()%1>0.5:
                 statusLabel.configure(text='Battery Critical', foreground='grey')
             else:
                 statusLabel.configure(text='Battery Critical', foreground='red')
-        elif get_battery_information(0)[1]=='LOW':
+        elif batt_info[1]=='LOW':
             statusLabel.configure(text='Battery Low', foreground='orange')
         else:
             statusLabel.configure(text='Connected', foreground='#00ff00')
@@ -131,12 +143,15 @@ def audio_callback(in_data, frame_count, time_info, status):
         vibBar['value']=0
         statusLabel.configure(text='Not Connected', foreground='grey')
     if get_connected()[1]:
-        if get_battery_information(1)[1]=='EMPTY':
+        batt_info=get_battery_information(1)
+        if batt_info[0]=='DISCONNECTED':
+            status1Label.configure(text='Connected*', foreground='#00ff00')
+        elif batt_info[1]=='EMPTY':
             if time.time()%1>0.5:
                 status1Label.configure(text='Battery Critical', foreground='grey')
             else:
                 status1Label.configure(text='Battery Critical', foreground='red')
-        elif get_battery_information(1)[1]=='LOW':
+        elif batt_info[1]=='LOW':
             status1Label.configure(text='Battery Low', foreground='orange')
         else:
             status1Label.configure(text='Connected', foreground='#00ff00')
@@ -154,12 +169,15 @@ def audio_callback(in_data, frame_count, time_info, status):
         vibBar1['value']=0
         status1Label.configure(text='Not Connected', foreground='grey')
     if get_connected()[2]:
-        if get_battery_information(2)[1]=='EMPTY':
+        batt_info=get_battery_information(2)
+        if batt_info[0]=='DISCONNECTED':
+            status2Label.configure(text='Connected*', foreground='#00ff00')
+        elif batt_info[1]=='EMPTY':
             if time.time()%1>0.5:
                 status2Label.configure(text='Battery Critical', foreground='grey')
             else:
                 status2Label.configure(text='Battery Critical', foreground='red')
-        elif get_battery_information(2)[1]=='LOW':
+        elif batt_info[1]=='LOW':
             status2Label.configure(text='Battery Low', foreground='orange')
         else:
             status2Label.configure(text='Connected', foreground='#00ff00')
@@ -177,12 +195,15 @@ def audio_callback(in_data, frame_count, time_info, status):
         vibBar2['value']=0
         status2Label.configure(text='Not Connected', foreground='grey')
     if get_connected()[3]:
-        if get_battery_information(3)[1]=='EMPTY':
+        batt_info=get_battery_information(3)
+        if batt_info[0]=='DISCONNECTED':
+            status3Label.configure(text='Connected*', foreground='#00ff00')
+        if batt_info[1]=='EMPTY':
             if time.time()%1>0.5:
                 status3Label.configure(text='Battery Critical', foreground='grey')
             else:
                 status3Label.configure(text='Battery Critical', foreground='red')
-        elif get_battery_information(3)[1]=='LOW':
+        elif batt_info[1]=='LOW':
             status3Label.configure(text='Battery Low', foreground='orange')
         else:
             status3Label.configure(text='Connected', foreground='#00ff00')
@@ -370,15 +391,23 @@ def start_stop():
             pass
         addrEntry.config(state=NORMAL)
         startButton.config(text='Start')
+def disable_rumble_1():
+    vibSlider.set(0)
+def disable_rumble_2():
+    vibSlider1.set(0)
+def disable_rumble_3():
+    vibSlider2.set(0)
+def disable_rumble_4():
+    vibSlider3.set(0)
 root=Tk()
-root.title('Bass Vibrator')
+root.title('Bass Vibrator v0.1.1 (c) HapticWave Software')
 LEFT='left'
 root.socket_open=False
 root.resizable(False, False)
 Label(root, text='Bass Vibrator Settings').pack()
 root.protocol('WM_DELETE_WINDOW', root.withdraw)
 image = Image.open(get_resource_path('snd.ico'))
-menu = (item('Restore', root.deiconify), item('Exit', close))
+menu = (item('Disable Controller 1 Rumble', disable_rumble_1), item('Disable Controller 2 Rumble', disable_rumble_2), item('Disable Controller 3 Rumble', disable_rumble_3), item('Disable Controller 4 Rumble', disable_rumble_4), item('Restore', root.deiconify), item('Exit', close))
 icon = pystray.Icon("name", image, "Bass Vibrator", menu)
 Thread(target=icon.run, daemon=True).start()
 root.iconbitmap(get_resource_path('snd.ico'))
