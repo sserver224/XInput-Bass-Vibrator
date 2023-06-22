@@ -1,7 +1,7 @@
 # XInput-Bass-Vibrator
 A program that vibrates XInput devices based on bass output from the default audio output
 
-Up to 4 controllers are supported.
+Up to 4 controllers are supported for versions 0.1.5 and earlier. For later versions, there is no controller limit, but adding more controllers may increase latency.
 
 This offers the functionality of acousto-haptic vests and gloves, but at a much lower price.
 
@@ -28,17 +28,17 @@ If you're using a DualShock 3 wirelessly, bluetooth drivers such as DSHidMini + 
 
 If there is latency in the vibrations when using wired headphones/speakers, try playing audio through a Bluetooth audio device to "lag" the sound a bit so it syncs up with the vibrations.
 
-If the controller does not output power source information (like a battery) but is connected, the status indicator will show "Connected*".
+If the controller does not output power source information (like a battery) but is connected, the status indicator will show "Critical".
 
 OBS (with necessary plugins): https://drive.google.com/file/d/1II3nyKbAy5YOEfShlgLsGeU040QMhkKW/view?usp=sharing
 
 Controllers with precise haptics, such as the Joy-Con, Nintendo Switch Pro Controller, or the DualSense (PS5 controller) are recommended.
 
-If using a Nintendo Joy-Con or Pro-Con with DS4Windows, it is NOT recommended to set the vibration intensity higher than a 30%, as the HD rumble may be audible at that point.
+If using a Nintendo Joy-Con or Pro-Con with DS4Windows, it is NOT recommended to set the vibration intensity higher than 30%, as the HD rumble may be audible at that point.
 
 If using a Nintendo Switch JoyCon/ProCon with DS4Windows, the Home button ring will light up blue. **This is normal.**
 
-Turn off right motor rumble if the right motor on the controller seems like to be an on/off motor and does not use a gradient. One example of a controller like this is the DualShock 3.
+Turn off right motor rumble if the right motor on the controller seems to be an on/off motor and does not use a gradient. One example of a controller like this is the DualShock 3.
 
 Wired connection is recommended as the vibration can update faster over a wired connection.
 
