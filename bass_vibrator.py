@@ -1,5 +1,4 @@
 #Copyright (c) 2023-present sserver224.
-#Copyright (c) 2023-present sserver224.
 from tendo import singleton
 import sys
 try:
@@ -13,7 +12,7 @@ import numpy as np
 from tkinter import *
 from tkinter.ttk import *
 import os
-from XInput import *
+import pygame
 import pystray
 import ctypes, comtypes
 from ctypes import wintypes
@@ -22,10 +21,8 @@ from PIL import Image
 from threading import Thread
 from idlelib.tooltip import Hovertip
 import time
-import socket
-import re
 FORMAT = pyaudio.paInt16# audio format
-CHANNELS = 1 # mono audio
+CHANNELS = 2 # mono audio
 RATE=44100
 CHUNK=1024
 def get_resource_path(relative_path):
@@ -40,198 +37,164 @@ def close():
         root.destroy()
     except:
         pass
-    for i in range(4):
-        set_vibration(i, 0, 0)
+    for controller in root.joysticks.values():
+        controller.stop_rumble()
     stream.stop_stream()
     stream.close()
     p.terminate()
-    for i in range(4):
-        set_vibration(i, 0, 0)
+    for controller in root.joysticks.values():
+        controller.stop_rumble()
+    pygame.joystick.quit()
+    pygame.quit()
     sys.exit()
 import struct
 from scipy.signal import butter, lfilter
-def is_valid_ipv4(ip):
-    """Validates IPv4 addresses.
-    """
-    pattern = re.compile(r"""
-        ^
-        (?:
-          # Dotted variants:
-          (?:
-            # Decimal 1-255 (no leading 0's)
-            [3-9]\d?|2(?:5[0-5]|[0-4]?\d)?|1\d{0,2}
-          |
-            0x0*[0-9a-f]{1,2}  # Hexadecimal 0x0 - 0xFF (possible leading 0's)
-          |
-            0+[1-3]?[0-7]{0,2} # Octal 0 - 0377 (possible leading 0's)
-          )
-          (?:                  # Repeat 0-3 times, separated by a dot
-            \.
-            (?:
-              [3-9]\d?|2(?:5[0-5]|[0-4]?\d)?|1\d{0,2}
-            |
-              0x0*[0-9a-f]{1,2}
-            |
-              0+[1-3]?[0-7]{0,2}
-            )
-          ){0,3}
-        |
-          0x0*[0-9a-f]{1,8}    # Hexadecimal notation, 0x0 - 0xffffffff
-        |
-          0+[0-3]?[0-7]{0,10}  # Octal notation, 0 - 037777777777
-        |
-          # Decimal notation, 1-4294967295:
-          429496729[0-5]|42949672[0-8]\d|4294967[01]\d\d|429496[0-6]\d{3}|
-          42949[0-5]\d{4}|4294[0-8]\d{5}|429[0-3]\d{6}|42[0-8]\d{7}|
-          4[01]\d{8}|[1-3]\d{0,9}|[4-9]\d{0,8}
-        )
-        $
-    """, re.VERBOSE | re.IGNORECASE)
-    return pattern.match(ip) is not None
 def audio_callback(in_data, frame_count, time_info, status):
     # Convert raw bytes to numpy array of 16-bit integers
-    samples = np.frombuffer(in_data, dtype=np.int16)
+    samples = np.frombuffer(in_data, dtype=np.int16).reshape(-1, 2)
     
-    # Apply window function to reduce spectral leakage
+    # Apply window function to reduce spectral leakage for each channel
     window = np.hamming(len(samples))
-    samples = samples * window
+    samples = samples * window[:, np.newaxis]
     
-    # Compute power spectrum using FFT algorithm
-    spectrum = np.abs(np.fft.fft(samples))**2
+    bass_loudness = ()
     
-    # Define frequency range of interest
-    freq_range = (20, 120)  # Hz
-    
-    # Find indices corresponding to frequency range of interest
-    f = np.fft.fftfreq(len(samples), 1/RATE)
-    idx = np.logical_and(f >= freq_range[0], f <= freq_range[1])
-    bass_spectrum = spectrum[idx]
-    
-    # Calculate total energy in bass range
-    bass_energy = np.sum(bass_spectrum)
-    
-    # Define normalization factor
-    max_value = np.iinfo(np.int16).max  # maximum value of 16-bit integer
-    
-    # Normalize energy value to range of 0.0 to 1.0
-    bass_loudness = bass_energy / (max_value * len(bass_spectrum))
-    # Print the loudness value
-    if get_connected()[0]:
-        batt_info=get_battery_information(0)
-        if batt_info[0]=='DISCONNECTED':
-            statusLabel.configure(text='Connected*', foreground='#00ff00')
-        elif batt_info[1]=='EMPTY':
-            if time.time()%1>0.5:
-                statusLabel.configure(text='Battery Critical', foreground='grey')
+    for channel in samples.T:  # Transpose to iterate over channels
+        # Compute power spectrum using FFT algorithm
+        spectrum = np.abs(np.fft.fft(channel)) ** 2
+
+        # Define frequency range of interest
+        freq_range = (20, 120)  # Hz
+
+        # Find indices corresponding to frequency range of interest
+        f = np.fft.fftfreq(len(channel), 1 / RATE)
+        idx = np.logical_and(f >= freq_range[0], f <= freq_range[1])
+
+        # Apply indices to get bass spectrum for the channel
+        bass_spectrum = spectrum[idx]
+
+        # Calculate total energy in bass range for the channel
+        bass_energy = np.sum(bass_spectrum)
+
+        # Define normalization factor
+        max_value = np.iinfo(np.int16).max  # maximum value of 16-bit integer
+
+        # Normalize energy value to range of 0.0 to 1.0 for the channel
+        bass_loudness_channel = bass_energy / (max_value * len(bass_spectrum))
+        bass_loudness += (bass_loudness_channel,)
+    for event in pygame.event.get():
+        if event.type == pygame.JOYDEVICEADDED:
+            joy = pygame.joystick.Joystick(event.device_index)
+            tab=Frame(tabControl)
+            root.tabs[joy.get_instance_id()]=tab
+            Label(tab, text='Battery:').pack()
+            statusLabel=Label(tab, text='Unknown', foreground='grey')
+            statusLabel.pack()
+            root.statuses[joy.get_instance_id()]=statusLabel
+            Label(tab, text='Rumble Channel').pack()
+            option=Combobox(tab, state='readonly', values=['Off', 'Left', 'Right', 'Stereo'])
+            option.pack()
+            checkbox=Checkbutton(tab, text='Disable Right Motor Rumble (Only when channel is set to Left or Right)')
+            checkbox.state(['!alternate'])
+            root.checkboxes[joy.get_instance_id()]=checkbox
+            joy_name=joy.get_name()
+            checkbox.pack()
+            if joy_name=='Nintendo Switch Pro Controller':
+                option.set('Stereo')
+                checkbox.state(['disabled'])
+                Hovertip(checkbox,'Due to the equal sizes of the haptic actuators and both of them having rumble gradients, right motor rumble is always enabled for Nintendo Switch Pro Controllers.')
             else:
-                statusLabel.configure(text='Battery Critical', foreground='red')
-        elif batt_info[1]=='LOW':
-            statusLabel.configure(text='Battery Low', foreground='orange')
+                if joy_name=='PS4 Controller':
+                    option.set('Stereo')
+                else:
+                    option.set('Off')
+                Hovertip(checkbox,'Some controllers, like the DualShock 3, have a right motor that does not have a rumble gradient. If your controller has a right motor that does not have a rumble gradient, check the box.')
+            root.options[joy.get_instance_id()]=option
+            tabControl.add(tab, text=joy.get_name().replace("Controller", "C."))
+            root.joysticks[joy.get_instance_id()] = joy
+        if event.type == pygame.JOYDEVICEREMOVED:
+            tabControl.forget(tuple(root.joysticks.keys()).index(event.instance_id))
+            del root.joysticks[event.instance_id]
+            del root.statuses[event.instance_id]
+            del root.options[event.instance_id]
+            del root.tabs[event.instance_id]
+    low_bat_count=0
+    crit_bat_count=0
+    try:
+        if (IAudioEndpointVolume.get_default().GetMasterVolumeLevelScalar()>0 and IAudioEndpointVolume.get_default().GetMute()==0):
+            sound_on=True
         else:
-            statusLabel.configure(text='Connected', foreground='#00ff00')
+            sound_on=False
+    except Exception as e:
+        sound_on=False
+    for controller in root.joysticks.values():
+        battery=controller.get_power_level()
+        instance_id=controller.get_instance_id()
         try:
-            if IAudioEndpointVolume.get_default().GetMasterVolumeLevelScalar()>0 and IAudioEndpointVolume.get_default().GetMute()==0:
-                vibBar['value']=min((bass_loudness/1919796895), 1.0)*vibSlider.get()
-                set_vibration(0, min(float(bass_loudness/1919796895), 1.0)*vibSlider.get(), min(float(bass_loudness/1919796895)*int(rMotorEnable.instate(['selected'])), 1.0)*vibSlider.get())
+            if battery=='max':
+                root.statuses[instance_id].config(text='Full', foreground='#00ff00')
+            elif battery=='full':
+                root.statuses[instance_id].config(text='High', foreground='#00ff00')
+            elif battery=='medium':
+                root.statuses[instance_id].config(text='Medium', foreground='orange')
+            elif battery=='low':
+                root.statuses[instance_id].config(text='Low', foreground='red')
+                low_bat_count+=1
+            elif battery=='empty':
+                if time.time()%1>=0.5:
+                    color='red'
+                else:
+                    color='grey'
+                root.statuses[instance_id].config(text='Critical', foreground=color)
+                crit_bat_count+=1
+            elif battery=='wired':
+                root.statuses[instance_id].config(text='Wired', foreground='#00ff00')
             else:
-                vibBar['value']=0
-                set_vibration(0, 0, 0)
+                root.statuses[instance_id].config(text='Unknown', foreground='grey')
         except:
+            pass
+        if sound_on:
+            if (bass_loudness[0]/1919796895)>=float(noise_gate.get())*0.01:
+                left_rumble=min((bass_loudness[0]/1919796895), 1.0)*vibSlider.get()
+            else:
+                left_rumble=0
+            if (bass_loudness[1]/1919796895)>=float(noise_gate.get())*0.01:
+                right_rumble=min((bass_loudness[1]/1919796895), 1.0)*vibSlider1.get()
+            else:
+                right_rumble=0
+            vibBar['value']=left_rumble
+            vibBar1['value']=right_rumble
+            instance_id=controller.get_instance_id()
+            if root.options[instance_id].get()=='Stereo':
+                controller.rumble(left_rumble, right_rumble, 0)
+            elif root.options[instance_id].get()=='Left':
+                if root.checkboxes[instance_id].instate(['selected']):
+                    controller.rumble(left_rumble, 0, 0)
+                else:
+                    controller.rumble(left_rumble, left_rumble, 0)
+            elif root.options[instance_id].get()=='Right':
+                if root.checkboxes[instance_id].instate(['selected']):
+                    controller.rumble(right_rumble, 0, 0)
+                else:
+                    controller.rumble(right_rumble, right_rumble, 0)
+        else:
             vibBar['value']=0
-            set_vibration(0, 0, 0)
-    else:
-        vibBar['value']=0
-        statusLabel.configure(text='Not Connected', foreground='grey')
-    if get_connected()[1]:
-        batt_info=get_battery_information(1)
-        if batt_info[0]=='DISCONNECTED':
-            status1Label.configure(text='Connected*', foreground='#00ff00')
-        elif batt_info[1]=='EMPTY':
-            if time.time()%1>0.5:
-                status1Label.configure(text='Battery Critical', foreground='grey')
-            else:
-                status1Label.configure(text='Battery Critical', foreground='red')
-        elif batt_info[1]=='LOW':
-            status1Label.configure(text='Battery Low', foreground='orange')
-        else:
-            status1Label.configure(text='Connected', foreground='#00ff00')
-        try:
-            if IAudioEndpointVolume.get_default().GetMasterVolumeLevelScalar()>0 and IAudioEndpointVolume.get_default().GetMute()==0:
-                vibBar1['value']=min((bass_loudness/1919796895), 1.0)*vibSlider1.get()
-                set_vibration(1, min(float(bass_loudness/1919796895), 1.0)*vibSlider1.get(), min(float(bass_loudness/1919796895)*int(rMotorEnable1.instate(['selected'])), 1.0)*vibSlider1.get())
-            else:
-                vibBar1['value']=0
-                set_vibration(1, 0, 0)
-        except:
             vibBar1['value']=0
-            set_vibration(1, 0, 0)
+            controller.stop_rumble()
+    if len(root.joysticks)>0:
+        if crit_bat_count>0:
+            try:
+                controller_count.config(text=str(len(root.joysticks)), foreground=color)
+            except:
+                controller_count.config(text=str(len(root.joysticks)), foreground='red')
+        elif low_bat_count>0:
+            controller_count.config(text=str(len(root.joysticks)), foreground='red')
+        else:
+            controller_count.config(text=str(len(root.joysticks)), foreground='#00ff00')
     else:
+        controller_count.config(text='0', foreground='grey')
+        vibBar['value']=0
         vibBar1['value']=0
-        status1Label.configure(text='Not Connected', foreground='grey')
-    if get_connected()[2]:
-        batt_info=get_battery_information(2)
-        if batt_info[0]=='DISCONNECTED':
-            status2Label.configure(text='Connected*', foreground='#00ff00')
-        elif batt_info[1]=='EMPTY':
-            if time.time()%1>0.5:
-                status2Label.configure(text='Battery Critical', foreground='grey')
-            else:
-                status2Label.configure(text='Battery Critical', foreground='red')
-        elif batt_info[1]=='LOW':
-            status2Label.configure(text='Battery Low', foreground='orange')
-        else:
-            status2Label.configure(text='Connected', foreground='#00ff00')
-        try:
-            if IAudioEndpointVolume.get_default().GetMasterVolumeLevelScalar()>0 and IAudioEndpointVolume.get_default().GetMute()==0:
-                vibBar2['value']=min((bass_loudness/1919796895), 1.0)*vibSlider2.get()
-                set_vibration(2, min(float(bass_loudness/1919796895), 1.0)*vibSlider2.get(), min(float(bass_loudness/1919796895)*int(rMotorEnable2.instate(['selected'])), 1.0)*vibSlider2.get())
-            else:
-                vibBar2['value']=0
-                set_vibration(2, 0, 0)
-        except:
-            vibBar2['value']=0
-            set_vibration(2, 0, 0)
-    else:
-        vibBar2['value']=0
-        status2Label.configure(text='Not Connected', foreground='grey')
-    if get_connected()[3]:
-        batt_info=get_battery_information(3)
-        if batt_info[0]=='DISCONNECTED':
-            status3Label.configure(text='Connected*', foreground='#00ff00')
-        if batt_info[1]=='EMPTY':
-            if time.time()%1>0.5:
-                status3Label.configure(text='Battery Critical', foreground='grey')
-            else:
-                status3Label.configure(text='Battery Critical', foreground='red')
-        elif batt_info[1]=='LOW':
-            status3Label.configure(text='Battery Low', foreground='orange')
-        else:
-            status3Label.configure(text='Connected', foreground='#00ff00')
-        try:
-            if IAudioEndpointVolume.get_default().GetMasterVolumeLevelScalar()>0 and IAudioEndpointVolume.get_default().GetMute()==0:
-                vibBar3['value']=min((bass_loudness/1919796895), 1.0)*vibSlider3.get()
-                set_vibration(3, min(float(bass_loudness/1919796895), 1.0)*vibSlider3.get(), min(float(bass_loudness/1919796895)*int(rMotorEnable3.instate(['selected'])), 1.0)*vibSlider3.get())
-            else:
-                vibBar3['value']=0
-                set_vibration(3, 0, 0)
-        except:
-            vibBar3['value']=0
-            set_vibration(3, 0, 0)
-    else:
-        vibBar3['value']=0
-        status3Label.configure(text='Not Connected', foreground='grey')
-    if root.socket_open:
-        try:
-            if IAudioEndpointVolume.get_default().GetMasterVolumeLevelScalar()>0 and IAudioEndpointVolume.get_default().GetMute()==0:
-                vibBar4['value']=min((bass_loudness/1919796895), 1.0)*vibSlider4.get()
-                sock.sendto(str(min((bass_loudness/1919796895), 1.0)*vibSlider3.get()).encode(), (addrEntry.get(),8556))    
-            else:
-                vibBar4['value']=0
-                sock.sendto('0.0'.encode(), (addrEntry.get(),8556))
-        except:
-            vibBar4['value']=0
-    else:
-        vibBar4['value']=0
     return (None, pyaudio.paContinue)
 
 
@@ -372,124 +335,90 @@ class IAudioEndpointVolume(comtypes.IUnknown):
         endpoint = IMMDeviceEnumerator.get_default(eRender, eMultimedia)
         interface = endpoint.Activate(cls._iid_, comtypes.CLSCTX_INPROC_SERVER)
         return ctypes.cast(interface, ctypes.POINTER(cls))
-def start_stop():
-    if not root.socket_open:
-        if is_valid_ipv4(addrEntry.get()):
-            try:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            except:
-                return
-            else:
-                root.socket_open=True
-                addrEntry.config(state=DISABLED)
-                startButton.config(text='Stop')
-    else:
-        root.socket_open=False
-        try:
-            sock.close()
-        except:
-            pass
-        addrEntry.config(state=NORMAL)
-        startButton.config(text='Start')
 def disable_rumble_1():
     vibSlider.set(0)
 def disable_rumble_2():
     vibSlider1.set(0)
-def disable_rumble_3():
-    vibSlider2.set(0)
-def disable_rumble_4():
-    vibSlider3.set(0)
+def low_rumble_1():
+    vibSlider.set(0.25)
+def low_rumble_2():
+    vibSlider1.set(0.25)
+def med_rumble_1():
+    vibSlider.set(0.5)
+def med_rumble_2():
+    vibSlider1.set(0.5)
+def hi_rumble_1():
+    vibSlider.set(0.75)
+def hi_rumble_2():
+    vibSlider1.set(0.75)
+def max_rumble_1():
+    vibSlider.set(1)
+def max_rumble_2():
+    vibSlider1.set(1)
+def stop_all():
+    for controller in root.joysticks.values():
+        controller.stop_rumble()
+pygame.init()
+pygame.joystick.init()
 root=Tk()
-root.title('Bass Vibrator v0.1.1 (c) HapticWave Software')
+root.title('Bass Vibrator v0.2 (c) HapticWave Software (Beta)')
 LEFT='left'
+root.joysticks={}
+root.tabs={}
+root.rumble_status={}
+root.options={}
+root.statuses={}
+root.checkboxes={}
 root.socket_open=False
 root.resizable(False, False)
 Label(root, text='Bass Vibrator Settings').pack()
 root.protocol('WM_DELETE_WINDOW', root.withdraw)
-image = Image.open(get_resource_path('snd.ico'))
-menu = (item('Disable Controller 1 Rumble', disable_rumble_1), item('Disable Controller 2 Rumble', disable_rumble_2), item('Disable Controller 3 Rumble', disable_rumble_3), item('Disable Controller 4 Rumble', disable_rumble_4), item('Restore', root.deiconify), item('Exit', close))
+image = Image.open(get_resource_path('controller.ico'))
+menu = (item('L Channel Rumble Off', disable_rumble_1), item('L Channel Rumble Low', low_rumble_1), item('L Channel Rumble Moderate', med_rumble_1), item('L Channel Rumble High', hi_rumble_1), item('L Channel Rumble Maximum', max_rumble_1), item('R Channel Rumble Off', disable_rumble_2), item('R Channel Rumble Low', low_rumble_2), item('R Channel Rumble Moderate', med_rumble_2), item('R Channel Rumble High', hi_rumble_2), item('R Channel Rumble Maximum', max_rumble_2), item('Send Rumble OFF to All Controllers', stop_all), item('Restore', root.deiconify), item('Exit', close))
 icon = pystray.Icon("name", image, "Bass Vibrator", menu)
 Thread(target=icon.run, daemon=True).start()
-root.iconbitmap(get_resource_path('snd.ico'))
+root.iconbitmap(get_resource_path('controller.ico'))
 linkIn=Checkbutton(root, text='Link Intensity Sliders', state=DISABLED)
 linkIn.pack()
 linkIn.state(['!alternate'])
 Hovertip(linkIn,'This has not been implemented yet')
-frame1=LabelFrame(root, text='Controller 1')
+frame4=Frame(root)
+frame4.pack()
+Label(frame4, text='Gate').pack(side=LEFT)
+noise_gate=Spinbox(frame4, from_=0, to_=10, increment=0.1, state='readonly')
+noise_gate.pack(side=LEFT, padx=5)
+noise_gate.set('1.0')
+Label(frame4, text='%').pack(side=LEFT)
+stopButton=Button(root, text='Send Rumble OFF to All Controllers', command=stop_all)
+stopButton.pack()
+frame1=LabelFrame(root, text='Left Channel')
 frame1.pack(anchor=NW)
-Label(frame1, text='Status:').pack(side=LEFT)
-statusLabel=Label(frame1, text='Not Connected', foreground='grey', width=15)
-statusLabel.pack(side=LEFT, padx=5)
 vibBar=Progressbar(frame1, maximum=1, length=200)
 vibBar.pack(side=LEFT, padx=5)
 vibSlider=Scale(frame1, from_=0, to=1, length=200)
 vibSlider.pack(side=LEFT, padx=5)
-rMotorEnable=Checkbutton(frame1, text='Right Motor Rumble')
-rMotorEnable.pack(side=LEFT, padx=5)
-rMotorEnable.state(['!alternate', 'selected'])
-Hovertip(rMotorEnable,'Some controllers, like the DualShock 3, have a right motor that does not have a rumble gradient. If your controller has a right motor that does not have a rumble gradient, uncheck the box.')
-frame2=LabelFrame(root, text='Controller 2')
+frame2=LabelFrame(root, text='Right Channel')
 frame2.pack(anchor=NW)
-Label(frame2, text='Status:').pack(side=LEFT)
-status1Label=Label(frame2, text='Not Connected', foreground='grey', width=15)
-status1Label.pack(side=LEFT, padx=5)
 vibBar1=Progressbar(frame2, maximum=1, length=200)
 vibBar1.pack(side=LEFT, padx=5)
 vibSlider1=Scale(frame2, from_=0, to=1, length=200)
 vibSlider1.pack(side=LEFT, padx=5)
-rMotorEnable1=Checkbutton(frame2, text='Right Motor Rumble')
-rMotorEnable1.pack(side=LEFT, padx=5)
-rMotorEnable1.state(['!alternate', 'selected'])
-Hovertip(rMotorEnable1,'Some controllers, like the DualShock 3, have a right motor that does not have a rumble gradient. If your controller has a right motor that does not have a rumble gradient, uncheck the box.')
-frame3=LabelFrame(root, text='Controller 3')
+frame3=Frame(root)
 frame3.pack(anchor=NW)
-Label(frame3, text='Status:').pack(side=LEFT)
-status2Label=Label(frame3, text='Not Connected', foreground='grey', width=15)
-status2Label.pack(side=LEFT, padx=5)
-vibBar2=Progressbar(frame3, maximum=1, length=200)
-vibBar2.pack(side=LEFT, padx=5)
-vibSlider2=Scale(frame3, from_=0, to=1, length=200)
-vibSlider2.pack(side=LEFT, padx=5)
-rMotorEnable2=Checkbutton(frame3, text='Right Motor Rumble')
-rMotorEnable2.pack(side=LEFT, padx=5)
-rMotorEnable2.state(['!alternate', 'selected'])
-Hovertip(rMotorEnable2,'Some controllers, like the DualShock 3, have a right motor that does not have a rumble gradient. If your controller has a right motor that does not have a rumble gradient, uncheck the box.')
-frame4=LabelFrame(root, text='Controller 4')
-frame4.pack(anchor=NW)
-Label(frame4, text='Status:').pack(side=LEFT)
-status3Label=Label(frame4, text='Not Connected', foreground='grey', width=15)
-status3Label.pack(side=LEFT, padx=5)
-vibBar3=Progressbar(frame4, maximum=1, length=200)
-vibBar3.pack(side=LEFT, padx=5)
-vibSlider3=Scale(frame4, from_=0, to=1, length=200)
-vibSlider3.pack(side=LEFT, padx=5)
-rMotorEnable3=Checkbutton(frame4, text='Right Motor Rumble')
-rMotorEnable3.pack(side=LEFT, padx=5)
-rMotorEnable3.state(['!alternate', 'selected'])
-Hovertip(rMotorEnable3,'Some controllers, like the DualShock 3, have a right motor that does not have a rumble gradient. If your controller has a right motor that does not have a rumble gradient, uncheck the box.')
-frame5=LabelFrame(root, text='UDP Socket Output')
-frame5.pack(anchor=NW)
-addrEntry=Entry(frame5)
-addrEntry.pack(side=LEFT)
-vibBar4=Progressbar(frame5, maximum=1, length=200)
-vibBar4.pack(side=LEFT, padx=5)
-vibSlider4=Scale(frame5, from_=0, to=1, length=200)
-vibSlider4.pack(side=LEFT, padx=5)
-startButton=Button(frame5, text='Start', command=start_stop)
-startButton.pack(side=LEFT, padx=5)
-Hovertip(vibSlider, 'Controller 1 vibration volume')
-Hovertip(vibSlider1, 'Controller 2 vibration volume')
-Hovertip(vibSlider2, 'Controller 3 vibration volume')
-Hovertip(vibSlider3, 'Controller 4 vibration volume')
-Hovertip(vibSlider4, 'UDP remote vibration volume')
-Hovertip(vibBar, 'Controller 1 vibration meter')
-Hovertip(vibBar1, 'Controller 2 vibration meter')
-Hovertip(vibBar2, 'Controller 3 vibration meter')
-Hovertip(vibBar3, 'Controller 4 vibration meter')
-Hovertip(vibBar4, 'UDP remote vibration meter')
-Hovertip(addrEntry, 'Enter the IP address of the device running the remote rumble app')
+Label(frame3, text='Number of controllers connected:').pack(side=LEFT)
+controller_count=Label(frame3, text='0', foreground='grey')
+controller_count.pack(side=LEFT, padx=5)
+Hovertip(controller_count, 'A red number indicates a low battery in one or more controllers')
+Hovertip(vibSlider, 'L Channel vibration volume')
+Hovertip(vibSlider1, 'R Channel vibration volume')
+Hovertip(noise_gate, r'Minimum bass loudness in % before controllers begin vibrating')
+Hovertip(vibBar, 'L Channel vibration meter')
+Hovertip(vibBar1, 'R Channel vibration meter')
+Hovertip(stopButton, 'Click to stop any stray vibrations')
+tabControl=Notebook(root)
+tabControl.pack(anchor=NW, expand=True)
 stream = p.open(format=FORMAT,
-                channels=CHANNELS,
+                channels=2,
                 rate=RATE,
                 input=True,
                 frames_per_buffer=CHUNK,
