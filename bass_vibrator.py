@@ -212,6 +212,7 @@ while True:
         else:
             n+=1
     except OSError:
+        from tkinter import messagebox
         messagebox.showerror('No Loopback Device found', 'There is no Virtual Cable installed on this machine. This app will now close.')
         appclosed=True
         os._exit(1)
