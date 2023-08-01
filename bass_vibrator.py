@@ -207,6 +207,7 @@ while True:
             try:
                 os.system('SoundVolumeView.exe /SetAppDefault "VB-Audio Virtual Cable\Device\CABLE Output\Capture" 1 '+str(os.getpid()))
             except OSError:
+                from tkinter import messagebox
                 messagebox.showwarning('Loopback Device Found', 'Setting VB-Cable failed. Select the VB Cable by going to Settings>Sound>Volume mixer>Decibel Meter and select CABLE Output as input device')
             break
         else:
